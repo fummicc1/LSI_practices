@@ -1,0 +1,49 @@
+* /Users/fumiyatanaka/Work/LSI/sample_test_bench.asc
+V1 IN 0 SINE(0 {vsig} {fsig}) AC 1
+Rs IN N002 100
+Co N004 OUT 220µ
+RL OUT 0 600
+VDD VDD 0 {VDD}
+I1 VDD N001 {IREF}
+Ci N002 N003 220µ
+XX2 N001 VDD N003 0 N004 cm_amp
+
+* block symbol definitions
+.subckt cm_amp IREF VDD VIN VSS VOUT
+XU1 N001 N001 VDD VDD ptm180modp l=0.5u w=20u
+XU2 IREF IREF VSS VSS ptm180modn l=0.5u w=10u
+XU3 N004 IREF VSS VSS ptm180modn l=0.5u w=20u
+XU4 N001 VIN N004 VSS ptm180modn l=0.5u w=20u
+XU5 N002 N005 N004 VSS ptm180modn l=0.5u w=20u
+XU6 N002 N001 VDD VDD ptm180modp l=0.5u w=20u
+XU7 VOUT IREF VSS VSS ptm180modn l=0.5u w=200u
+XU8 VOUT N002 VDD VDD ptm180modp l=0.5u w=400u
+C1 N003 VOUT 4pC
+R1 N003 N002 100R
+R2 VOUT N005 900
+R3 N005 VSS 100
+.ends cm_amp
+
+;ac dec 100 1 1Meg
+.four {fsig} V(OUT)
+.param IREF=0.1m
+* Parameter Settings
+* Simulation Settings
+* Model Libraries
+* Ex. Headphone amp test bench
+.options plotwinsize=10
+.lib ptm180mod_ttt.lib
+.param VDD=1.8
+.temp 25
+.meas TRAN Pamp AVG V(VDD)*Ix(x1:VDD) FROM 1/{fsig} TO 2/{fsig}
+.param vsig=70m
+.param fsig=440
+.meas TRAN Pload AVG V(out)*I(RL) FROM 1/{fsig} TO 2/{fsig}
+.meas AC GainMax MAX V(OUT) FROM 20 TO 20k
+.meas AC GainMin MIN V(OUT) FROM 20 TO 20k
+.tran 10m
+;noise V(OUT) V1 dec 100 1 1Meg
+.meas NOISE VinrefNoise INTEG V(inoise) FROM 20 TO 20k
+.four {fsig} V(IN)
+.backanno
+.end
